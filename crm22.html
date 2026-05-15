@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CRM — Canva Pack</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'DM Sans', sans-serif; background: #07070f; color: #f1f5f9; min-height: 100vh; }
+
+    /* ── Login ── */
+    #login-screen {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh;
+      background: radial-gradient(ellipse at 50% 0%, rgba(124,58,237,.25), transparent 70%);
+    }
+    .login-box {
+      background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1);
+      border-radius: 24px; padding: 48px 40px; width: 100%; max-width: 380px;
+      text-align: center;
+    }
+    .login-box h1 { font-family: 'Syne', sans-serif; font-size: 24px; margin-bottom: 6px; }
+    .login-box p  { color: #64748b; font-size: 14px; margin-bottom: 28px; }
+    .login-box input {
+      width: 100%; padding: 14px 18px; border-radius: 12px;
+      background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.1);
+      color: #f1f5f9; font-size: 15px; font-family: 'DM Sans', sans-serif;
+      margin-bottom: 14px; outline: none;
+    }
+    .login-box input:focus { border-color: rgba(124,58,237,.6); }
+    .login-box button {
+      width: 100%; padding: 14px; border-radius: 12px;
+      background: linear-gradient(135deg, #7c3aed, #0ea5e9);
+      color: #fff; border: none; cursor: pointer;
+      font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px;
+    }
+    .login-box button:hover { opacity: .9; }
+    .login-error { color: #f87171; font-size: 13px; margin-top: 10px; display: none; }
+
+    /* ── App ── */
+    #app { display: none; }
+
+    /* ── Nav ── */
+    nav {
+      background: rgba(7,7,15,.92); backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255,255,255,.06);
+      padding: 14px 28px; display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+    }
+    nav .logo { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 18px; }
+    nav .logo span { background: linear-gradient(135deg,#a78bfa,#38bdf8); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    .nav-right { display: flex; align-items: center; gap: 16px; }
+    .refresh-btn {
+      padding: 8px 18px; border-radius: 100px; font-size: 13px; font-weight: 600;
+      background: rgba(124,58,237,.2); border: 1px solid rgba(124,58,237,.35); color: #a78bfa;
+      cursor: pointer; transition: all .2s;
+    }
+    .refresh-btn:hover { background: rgba(124,58,237,.35); }
+    .logout-btn {
+      padding: 8px 18px; border-radius: 100px; font-size: 13px; font-weight: 600;
+      background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1); color: #94a3b8;
+      cursor: pointer;
+    }
+    .last-update { font-size: 12px; color: #475569; }
+
+    /* ── Conteúdo ── */
+    .container { max-width: 1200px; margin: 0 auto; padding: 32px 24px; }
+
+    /* ── Cards de status ── */
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 32px; }
+    .card {
+      background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08);
+      border-radius: 16px; padding: 20px 24px; cursor: pointer; transition: all .25s;
+    }
+    .card:hover { transform: translateY(-3px); }
+    .card.active { border-color: rgba(124,58,237,.5); background: rgba(124,58,237,.1); }
+    .card-label { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 10px; }
+    .card-num   { font-family: 'Syne', sans-serif; font-size: 36px; font-weight: 800; line-height: 1; }
+    .card-sub   { font-size: 12px; color: #475569; margin-top: 4px; }
+
+    .card.aprovado  { border-color: rgba(16,185,129,.3); }
+    .card.aprovado .card-label { color: #34d399; }
+    .card.aprovado .card-num   { color: #34d399; }
+    .card.aprovado.active { background: rgba(16,185,129,.1); }
+
+    .card.pix       { border-color: rgba(251,191,36,.3); }
+    .card.pix .card-label { color: #fbbf24; }
+    .card.pix .card-num   { color: #fbbf24; }
+    .card.pix.active { background: rgba(251,191,36,.1); }
+
+    .card.recusado  { border-color: rgba(239,68,68,.3); }
+    .card.recusado .card-label { color: #f87171; }
+    .card.recusado .card-num   { color: #f87171; }
+    .card.recusado.active { background: rgba(239,68,68,.1); }
+
+    .card.total .card-label { color: #a78bfa; }
+    .card.total .card-num   { color: #a78bfa; }
+
+    /* ── Receita ── */
+    .receita-bar {
+      background: rgba(16,185,129,.08); border: 1px solid rgba(16,185,129,.2);
+      border-radius: 14px; padding: 16px 24px; margin-bottom: 28px;
+      display: flex; align-items: center; gap: 32px; flex-wrap: wrap;
+    }
+    .receita-item .r-label { font-size: 12px; color: #64748b; margin-bottom: 2px; }
+    .receita-item .r-val   { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: #34d399; }
+
+    /* ── Busca ── */
+    .toolbar { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+    .search-wrap { flex: 1; min-width: 220px; position: relative; }
+    .search-wrap input {
+      width: 100%; padding: 12px 18px 12px 42px;
+      background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1);
+      border-radius: 12px; color: #f1f5f9; font-size: 14px; font-family: 'DM Sans', sans-serif;
+      outline: none;
+    }
+    .search-wrap input:focus { border-color: rgba(124,58,237,.5); }
+    .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #475569; font-size: 16px; }
+
+    /* ── Tabela ── */
+    .table-wrap {
+      background: rgba(255,255,255,.03); border: 1px solid rgba(255,255,255,.07);
+      border-radius: 18px; overflow: hidden;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      padding: 14px 16px; text-align: left; font-size: 11px; font-weight: 700;
+      letter-spacing: .1em; text-transform: uppercase; color: #475569;
+      background: rgba(255,255,255,.03); border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    tbody tr { border-bottom: 1px solid rgba(255,255,255,.04); transition: background .15s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(255,255,255,.03); }
+    tbody td { padding: 14px 16px; font-size: 14px; vertical-align: middle; }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 12px; border-radius: 100px; font-size: 12px; font-weight: 600;
+    }
+    .badge.aprovado  { background: rgba(16,185,129,.15);  color: #34d399;  border: 1px solid rgba(16,185,129,.25); }
+    .badge.pix       { background: rgba(251,191,36,.15);  color: #fbbf24;  border: 1px solid rgba(251,191,36,.25); }
+    .badge.recusado  { background: rgba(239,68,68,.15);   color: #f87171;  border: 1px solid rgba(239,68,68,.25);  }
+    .badge.abandonado{ background: rgba(100,116,139,.15); color: #94a3b8;  border: 1px solid rgba(100,116,139,.25);}
+    .badge.reembolso { background: rgba(139,92,246,.15);  color: #a78bfa;  border: 1px solid rgba(139,92,246,.25); }
+
+    .td-name  { font-weight: 600; color: #e2e8f0; }
+    .td-email { color: #94a3b8; font-size: 13px; }
+    .td-date  { color: #64748b; font-size: 13px; white-space: nowrap; }
+    .td-valor { font-weight: 700; color: #34d399; }
+
+    .actions { display: flex; gap: 8px; }
+    .btn-wa {
+      padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 600;
+      background: rgba(37,211,102,.15); border: 1px solid rgba(37,211,102,.3); color: #4ade80;
+      cursor: pointer; text-decoration: none; transition: all .2s; white-space: nowrap;
+    }
+    .btn-wa:hover { background: rgba(37,211,102,.3); }
+    .btn-copy {
+      padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 600;
+      background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); color: #94a3b8;
+      cursor: pointer; transition: all .2s; white-space: nowrap;
+    }
+    .btn-copy:hover { background: rgba(255,255,255,.12); color: #f1f5f9; }
+
+    .empty {
+      text-align: center; padding: 60px 20px; color: #475569;
+    }
+    .empty .icon { font-size: 40px; margin-bottom: 12px; }
+
+    .loading { text-align: center; padding: 60px; color: #64748b; }
+
+    /* ── Config banner ── */
+    .config-banner {
+      background: rgba(251,191,36,.1); border: 1px solid rgba(251,191,36,.3);
+      border-radius: 12px; padding: 14px 20px; margin-bottom: 24px;
+      font-size: 13px; color: #fbbf24; display: none;
+    }
+    .config-banner.show { display: block; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-thumb { background: #7c3aed; border-radius: 2px; }
+
+    @media(max-width: 768px) {
+      .hide-mobile { display: none; }
+      tbody td { padding: 12px 10px; font-size: 13px; }
+      thead th { padding: 12px 10px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══════════════════════════════════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-box">
+    <h1>🔒 CRM <span style="background:linear-gradient(135deg,#a78bfa,#38bdf8);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">Canva Pack</span></h1>
+    <p>Acesso restrito ao administrador</p>
+    <input type="password" id="pwd-input" placeholder="Senha" onkeydown="if(event.key==='Enter')doLogin()"/>
+    <button onclick="doLogin()">Entrar</button>
+    <p class="login-error" id="login-error">Senha incorreta</p>
+  </div>
+</div>
+
+<!-- ══ APP ════════════════════════════════════════════════════════════════ -->
+<div id="app">
+
+  <nav>
+    <div class="logo"><span>Canva</span> Pack — CRM</div>
+    <div class="nav-right">
+      <span class="last-update" id="last-update"></span>
+      <button class="refresh-btn" onclick="loadData()">↻ Atualizar</button>
+      <button class="logout-btn" onclick="logout()">Sair</button>
+    </div>
+  </nav>
+
+  <div class="container">
+
+    <!-- Config banner -->
+    <div class="config-banner" id="config-banner">
+      ⚙️ <strong>Configure a URL da planilha:</strong> abra este arquivo, encontre a variável <code>SHEET_URL</code> no script e cole a URL do seu Google Apps Script.
+    </div>
+
+    <!-- Cards -->
+    <div class="cards">
+      <div class="card aprovado" id="card-all" onclick="filterBy('all')">
+        <div class="card-label">✅ Aprovadas</div>
+        <div class="card-num" id="cnt-aprovado">—</div>
+        <div class="card-sub">compras confirmadas</div>
+      </div>
+      <div class="card pix" onclick="filterBy('pix')">
+        <div class="card-label">⏳ Pix Pendente</div>
+        <div class="card-num" id="cnt-pix">—</div>
+        <div class="card-sub">gerou pix, não pagou</div>
+      </div>
+      <div class="card recusado" onclick="filterBy('recusado')">
+        <div class="card-label">❌ Recusadas</div>
+        <div class="card-num" id="cnt-recusado">—</div>
+        <div class="card-sub">cartão recusado</div>
+      </div>
+      <div class="card total" onclick="filterBy('todos')">
+        <div class="card-label">📊 Total de leads</div>
+        <div class="card-num" id="cnt-total">—</div>
+        <div class="card-sub">todos os contatos</div>
+      </div>
+    </div>
+
+    <!-- Receita -->
+    <div class="receita-bar">
+      <div class="receita-item">
+        <div class="r-label">💰 Receita confirmada</div>
+        <div class="r-val" id="receita-total">R$ 0,00</div>
+      </div>
+      <div class="receita-item">
+        <div class="r-label">🔥 Hoje</div>
+        <div class="r-val" id="receita-hoje">R$ 0,00</div>
+      </div>
+      <div class="receita-item">
+        <div class="r-label">📦 Ticket médio</div>
+        <div class="r-val" id="ticket-medio">R$ 0,00</div>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-input" placeholder="Buscar por nome, e-mail ou telefone..." oninput="renderTable()"/>
+      </div>
+    </div>
+
+    <!-- Tabela -->
+    <div class="table-wrap">
+      <div class="loading" id="loading">Carregando dados...</div>
+      <table id="main-table" style="display:none">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Nome</th>
+            <th>E-mail</th>
+            <th class="hide-mobile">Telefone</th>
+            <th>Status</th>
+            <th class="hide-mobile">Método</th>
+            <th>Valor</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+      <div class="empty" id="empty" style="display:none">
+        <div class="icon">📭</div>
+        <p>Nenhum resultado encontrado</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // ══════════════════════════════════════════════════════
+  // CONFIGURAÇÃO — Cole aqui a URL do seu Google Apps Script
+  // ══════════════════════════════════════════════════════
+  const SHEET_URL = "https://script.google.com/macros/s/AKfycbyZN-4allwP9Q-p7H2HxRpuP2hTfr0-zWP7dQn6iSY9doaYqv4YS75AmhDyPIuTM2Tt/exec";
+  const PASSWORD  = "canvapack2026"; // troque para sua senha
+
+  // ── Auth ────────────────────────────────────────────
+  function doLogin() {
+    const val = document.getElementById("pwd-input").value;
+    if (val === PASSWORD) {
+      sessionStorage.setItem("crm_auth", "1");
+      document.getElementById("login-screen").style.display = "none";
+      document.getElementById("app").style.display = "block";
+      loadData();
+      setInterval(loadData, 30000); // atualiza a cada 30s
+    } else {
+      document.getElementById("login-error").style.display = "block";
+    }
+  }
+
+  function logout() {
+    sessionStorage.removeItem("crm_auth");
+    location.reload();
+  }
+
+  // Verifica se já estava logado
+  if (sessionStorage.getItem("crm_auth")) {
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("app").style.display = "block";
+  }
+
+  // ── Dados ────────────────────────────────────────────
+  let allData = [];
+  let activeFilter = "todos";
+
+  async function loadData() {
+    if (SHEET_URL === "COLE_AQUI_A_URL_DO_APPS_SCRIPT") {
+      // Dados de demonstração
+      allData = [
+        { data:"15/05/2026 09:14", nome:"Fernanda Moura",  email:"fernanda@gmail.com",  telefone:"71999991111", status:"aprovado",  metodo:"Pix",    valor:19.90 },
+        { data:"15/05/2026 10:32", nome:"Gabriel Silva",   email:"gabriel@gmail.com",   telefone:"11988882222", status:"pix",       metodo:"Pix",    valor:19.90 },
+        { data:"15/05/2026 11:05", nome:"Camila Rocha",    email:"camila@gmail.com",    telefone:"21977773333", status:"aprovado",  metodo:"Cartão", valor:19.90 },
+        { data:"15/05/2026 12:18", nome:"Rafael Torres",   email:"rafael@gmail.com",    telefone:"31966664444", status:"recusado",  metodo:"Cartão", valor:19.90 },
+        { data:"15/05/2026 13:44", nome:"Juliana Lima",    email:"juliana@gmail.com",   telefone:"41955555555", status:"aprovado",  metodo:"Pix",    valor:19.90 },
+        { data:"15/05/2026 14:20", nome:"Marcos Pereira",  email:"marcos@gmail.com",    telefone:"51944446666", status:"abandonado",metodo:"—",      valor:0     },
+        { data:"15/05/2026 15:01", nome:"Bruna Alves",     email:"bruna@gmail.com",     telefone:"61933337777", status:"aprovado",  metodo:"Pix",    valor:19.90 },
+        { data:"15/05/2026 16:33", nome:"Diego Nascimento", email:"diego@gmail.com",    telefone:"81922228888", status:"pix",       metodo:"Pix",    valor:19.90 },
+      ];
+      document.getElementById("config-banner").classList.add("show");
+      render();
+      return;
+    }
+
+    try {
+      const res = await fetch(SHEET_URL);
+      allData = await res.json();
+      document.getElementById("config-banner").classList.remove("show");
+      render();
+    } catch(e) {
+      console.error("Erro ao carregar dados:", e);
+    }
+  }
+
+  function render() {
+    updateCards();
+    renderTable();
+    const now = new Date();
+    document.getElementById("last-update").textContent =
+      "Atualizado às " + now.toLocaleTimeString("pt-BR", {hour:"2-digit", minute:"2-digit"});
+  }
+
+  // ── Cards / Métricas ─────────────────────────────────
+  function updateCards() {
+    const aprovados  = allData.filter(r => r.status === "aprovado");
+    const pix        = allData.filter(r => r.status === "pix");
+    const recusados  = allData.filter(r => r.status === "recusado");
+
+    document.getElementById("cnt-aprovado").textContent = aprovados.length;
+    document.getElementById("cnt-pix").textContent      = pix.length;
+    document.getElementById("cnt-recusado").textContent = recusados.length;
+    document.getElementById("cnt-total").textContent    = allData.length;
+
+    const receita = aprovados.reduce((s, r) => s + Number(r.valor), 0);
+    const hoje = new Date().toLocaleDateString("pt-BR");
+    const receitaHoje = aprovados
+      .filter(r => r.data && r.data.startsWith(hoje))
+      .reduce((s, r) => s + Number(r.valor), 0);
+    const ticket = aprovados.length ? receita / aprovados.length : 0;
+
+    document.getElementById("receita-total").textContent = fmt(receita);
+    document.getElementById("receita-hoje").textContent  = fmt(receitaHoje);
+    document.getElementById("ticket-medio").textContent  = fmt(ticket);
+  }
+
+  function fmt(v) {
+    return "R$ " + Number(v).toFixed(2).replace(".", ",");
+  }
+
+  // ── Filtro e Tabela ──────────────────────────────────
+  function filterBy(f) {
+    activeFilter = f;
+    document.querySelectorAll(".card").forEach(c => c.classList.remove("active"));
+    renderTable();
+  }
+
+  function renderTable() {
+    const q = document.getElementById("search-input").value.toLowerCase();
+    let filtered = allData;
+
+    if (activeFilter !== "todos") {
+      filtered = filtered.filter(r => r.status === activeFilter);
+    }
+    if (q) {
+      filtered = filtered.filter(r =>
+        (r.nome||"").toLowerCase().includes(q) ||
+        (r.email||"").toLowerCase().includes(q) ||
+        (r.telefone||"").includes(q)
+      );
+    }
+
+    const tbody = document.getElementById("table-body");
+    tbody.innerHTML = "";
+    document.getElementById("loading").style.display = "none";
+
+    if (!filtered.length) {
+      document.getElementById("main-table").style.display = "none";
+      document.getElementById("empty").style.display = "block";
+      return;
+    }
+
+    document.getElementById("main-table").style.display = "table";
+    document.getElementById("empty").style.display = "none";
+
+    filtered.forEach(r => {
+      const tr = document.createElement("tr");
+      const phone = (r.telefone||"").replace(/\D/g,"");
+      const waMsgAprov = encodeURIComponent(`Oi ${r.nome?.split(" ")[0] || ""}! Aqui é o Wendell do Canva Pack. Seu acesso foi confirmado! Qualquer dúvida é só falar 😊`);
+      const waMsgPix   = encodeURIComponent(`Oi ${r.nome?.split(" ")[0] || ""}! Vi que você gerou o Pix do Canva Pack mas ainda não finalizou. Posso te ajudar com alguma coisa?`);
+      const waMsg = r.status === "aprovado" ? waMsgAprov : waMsgPix;
+
+      tr.innerHTML = `
+        <td class="td-date">${r.data || "—"}</td>
+        <td>
+          <div class="td-name">${r.nome || "—"}</div>
+        </td>
+        <td>
+          <div class="td-email">${r.email || "—"}</div>
+        </td>
+        <td class="td-date hide-mobile">${r.telefone || "—"}</td>
+        <td><span class="badge ${r.status}">${statusLabel(r.status)}</span></td>
+        <td class="td-date hide-mobile">${r.metodo || "—"}</td>
+        <td class="td-valor">${r.valor ? fmt(r.valor) : "—"}</td>
+        <td>
+          <div class="actions">
+            ${phone ? `<a class="btn-wa" href="https://wa.me/55${phone}?text=${waMsg}" target="_blank">💬 WhatsApp</a>` : ""}
+            <button class="btn-copy" onclick="copyText('${r.email}', this)">📋 E-mail</button>
+          </div>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function statusLabel(s) {
+    const map = {
+      aprovado: "✅ Aprovada",
+      pix: "⏳ Pix Pendente",
+      recusado: "❌ Recusada",
+      abandonado: "👻 Abandonado",
+      reembolso: "↩️ Reembolso",
+    };
+    return map[s] || s;
+  }
+
+  function copyText(text, btn) {
+    navigator.clipboard.writeText(text).then(() => {
+      const orig = btn.textContent;
+      btn.textContent = "✅ Copiado";
+      setTimeout(() => btn.textContent = orig, 1500);
+    });
+  }
+
+  // Init
+  if (sessionStorage.getItem("crm_auth")) {
+    loadData();
+    setInterval(loadData, 30000);
+  }
+</script>
+</body>
+</html>
